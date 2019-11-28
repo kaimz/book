@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>12实战：拆包粘包理论与解决方案.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="%E5%AE%9E%E6%88%98%EF%BC%9A%E6%8B%86%E5%8C%85%E7%B2%98%E5%8C%85%E7%90%86%E8%AE%BA%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">实战：拆包粘包理论与解决方案</h1>
+<p><strong>资源由 我爱学it(www.52studyit.com) 收集并免费发布</strong></p>
+<blockquote>
+<p>本小节我们来学习一下 Netty 里面拆包和粘包的概念，并且如何选择适合我们应用程序的拆包器</p>
+</blockquote>
+<p>在开始本小节之前，我们首先来看一个例子，本小节的例子我们选择<a href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db0336fb9a04fd73a3f9b">客户端与服务端双向通信</a>这小节的代码，然后做适当修改</p>
+<h2 id="%E6%8B%86%E5%8C%85%E7%B2%98%E5%8C%85%E4%BE%8B%E5%AD%90">拆包粘包例子</h2>
+<blockquote>
+<p>客户端 FirstClientHandler</p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FirstClientHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelActive</span><span class="hljs-params">(ChannelHandlerContext ctx)</span> </span>{
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++) {
+            ByteBuf buffer = getByteBuf(ctx);
+            ctx.channel().writeAndFlush(buffer);
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> ByteBuf <span class="hljs-title">getByteBuf</span><span class="hljs-params">(ChannelHandlerContext ctx)</span> </span>{
+        <span class="hljs-keyword">byte</span>[] bytes = <span class="hljs-string">"你好，欢迎关注我的微信公众号，《闪电侠的博客》!"</span>.getBytes(Charset.forName(<span class="hljs-string">"utf-8"</span>));
+        ByteBuf buffer = ctx.alloc().buffer();
+        buffer.writeBytes(bytes);
+        
+        <span class="hljs-keyword">return</span> buffer;
+    }
+}
+</div></code></pre>
+<p>客户端在连接建立成功之后，使用一个 for 循环，不断向服务端写一串数据</p>
+<blockquote>
+<p>服务端 FirstServerHandler</p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FirstServerHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> </span>{
+        ByteBuf byteBuf = (ByteBuf) msg;
+
+        System.out.println(<span class="hljs-keyword">new</span> Date() + <span class="hljs-string">": 服务端读到数据 -&gt; "</span> + byteBuf.toString(Charset.forName(<span class="hljs-string">"utf-8"</span>)));
+    }
+}
+</div></code></pre>
+<p>服务端收到数据之后，仅仅把数据打印出来，读者可以花几分钟时间思考一下，服务端的输出会是什么样子的？</p>
+<p>可能很多读者觉得服务端会输出 1000 次 “你好，欢迎关注我的微信公众号，《闪电侠的博客》!”，然而实际上服务端却是如下输出：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/8/28/1657de2890b5907c?w=1240&amp;h=746&amp;f=png&amp;s=986821" alt="image.png"></p>
+<p>从服务端的控制台输出可以看出，存在三种类型的输出</p>
+<ol>
+<li>一种是正常的字符串输出。</li>
+<li>一种是多个字符串“粘”在了一起，我们定义这种 ByteBuf 为粘包。</li>
+<li>一种是一个字符串被“拆”开，形成一个破碎的包，我们定义这种 ByteBuf 为半包。</li>
+</ol>
+<h2 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89%E7%B2%98%E5%8C%85%E5%8D%8A%E5%8C%85%E7%8E%B0%E8%B1%A1%EF%BC%9F">为什么会有粘包半包现象？</h2>
+<p>我们需要知道，尽管我们在应用层面使用了 Netty，但是对于操作系统来说，只认 TCP 协议，尽管我们的应用层是按照 ByteBuf 为 单位来发送数据，但是到了底层操作系统仍然是按照字节流发送数据，因此，数据到了服务端，也是按照字节流的方式读入，然后到了 Netty 应用层面，重新拼装成 ByteBuf，而这里的 ByteBuf 与客户端按顺序发送的 ByteBuf 可能是不对等的。因此，我们需要在客户端根据自定义协议来组装我们应用层的数据包，然后在服务端根据我们的应用层的协议来组装数据包，这个过程通常在服务端称为拆包，而在客户端称为粘包。</p>
+<p>拆包和粘包是相对的，一端粘了包，另外一端就需要将粘过的包拆开，举个栗子，发送端将三个数据包粘成两个 TCP 数据包发送到接收端，接收端就需要根据应用协议将两个数据包重新组装成三个数据包。</p>
+<h2 id="%E6%8B%86%E5%8C%85%E7%9A%84%E5%8E%9F%E7%90%86">拆包的原理</h2>
+<p>在没有 Netty 的情况下，用户如果自己需要拆包，基本原理就是不断从 TCP 缓冲区中读取数据，每次读取完都需要判断是否是一个完整的数据包</p>
+<ol>
+<li>如果当前读取的数据不足以拼接成一个完整的业务数据包，那就保留该数据，继续从 TCP 缓冲区中读取，直到得到一个完整的数据包。</li>
+<li>如果当前读到的数据加上已经读取的数据足够拼接成一个数据包，那就将已经读取的数据拼接上本次读取的数据，构成一个完整的业务数据包传递到业务逻辑，多余的数据仍然保留，以便和下次读到的数据尝试拼接。</li>
+</ol>
+<p>如果我们自己实现拆包，这个过程将会非常麻烦，我们的每一种自定义协议，都需要自己实现，还需要考虑各种异常，而 Netty 自带的一些开箱即用的拆包器已经完全满足我们的需求了，下面我们来介绍一下 Netty 有哪些自带的拆包器。</p>
+<h2 id="netty-%E8%87%AA%E5%B8%A6%E7%9A%84%E6%8B%86%E5%8C%85%E5%99%A8">Netty 自带的拆包器</h2>
+<h3 id="1-%E5%9B%BA%E5%AE%9A%E9%95%BF%E5%BA%A6%E7%9A%84%E6%8B%86%E5%8C%85%E5%99%A8-fixedlengthframedecoder">1. 固定长度的拆包器 FixedLengthFrameDecoder</h3>
+<p>如果你的应用层协议非常简单，每个数据包的长度都是固定的，比如 100，那么只需要把这个拆包器加到 pipeline 中，Netty 会把一个个长度为 100 的数据包 (ByteBuf) 传递到下一个 channelHandler。</p>
+<h3 id="2-%E8%A1%8C%E6%8B%86%E5%8C%85%E5%99%A8-linebasedframedecoder">2. 行拆包器 LineBasedFrameDecoder</h3>
+<p>从字面意思来看，发送端发送数据包的时候，每个数据包之间以换行符作为分隔，接收端通过 LineBasedFrameDecoder 将粘过的 ByteBuf 拆分成一个个完整的应用层数据包。</p>
+<h3 id="3-%E5%88%86%E9%9A%94%E7%AC%A6%E6%8B%86%E5%8C%85%E5%99%A8-delimiterbasedframedecoder">3. 分隔符拆包器 DelimiterBasedFrameDecoder</h3>
+<p>DelimiterBasedFrameDecoder 是行拆包器的通用版本，只不过我们可以自定义分隔符。</p>
+<h3 id="4-%E5%9F%BA%E4%BA%8E%E9%95%BF%E5%BA%A6%E5%9F%9F%E6%8B%86%E5%8C%85%E5%99%A8-lengthfieldbasedframedecoder">4. 基于长度域拆包器 LengthFieldBasedFrameDecoder</h3>
+<p>最后一种拆包器是最通用的一种拆包器，只要你的自定义协议中包含长度域字段，均可以使用这个拆包器来实现应用层拆包。由于上面三种拆包器比较简单，读者可以自行写出 demo，接下来，我们就结合我们小册的自定义协议，来学习一下如何使用基于长度域的拆包器来拆解我们的数据包。</p>
+<h2 id="%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-lengthfieldbasedframedecoder">如何使用 LengthFieldBasedFrameDecoder</h2>
+<p>首先，我们来回顾一下我们的自定义协议</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/8/13/1653028b36ee5d81?w=1240&amp;h=183&amp;f=png&amp;s=14316" alt="image.png"></p>
+<p>详细的协议分析参考 <a href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db045f265da0f83647c35">客户端与服务端通信协议编解码</a>这小节，这里不再赘述。
+关于拆包，我们只需要关注</p>
+<ol>
+<li>在我们的自定义协议中，我们的长度域在整个数据包的哪个地方，专业术语来说就是长度域相对整个数据包的偏移量是多少，这里显然是 4+1+1+1=7。</li>
+<li>另外需要关注的就是，我们长度域的长度是多少，这里显然是 4。
+有了长度域偏移量和长度域的长度，我们就可以构造一个拆包器。</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-keyword">new</span> LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, <span class="hljs-number">7</span>, <span class="hljs-number">4</span>);
+</div></code></pre>
+<p>其中，第一个参数指的是数据包的最大长度，第二个参数指的是长度域的偏移量，第三个参数指的是长度域的长度，这样一个拆包器写好之后，只需要在 pipeline 的最前面加上这个拆包器。</p>
+<p>由于这类拆包器使用最为广泛，想深入学习的读者可以参考我的这篇文章 <a href="https://www.jianshu.com/p/a0a51fd79f62">netty源码分析之LengthFieldBasedFrameDecoder</a></p>
+<blockquote>
+<p>服务端</p>
+</blockquote>
+<pre class="hljs"><code><div>ch.pipeline().addLast(<span class="hljs-keyword">new</span> LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, <span class="hljs-number">7</span>, <span class="hljs-number">4</span>));
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> PacketDecoder());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> LoginRequestHandler());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> MessageRequestHandler());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> PacketEncoder());
+</div></code></pre>
+<blockquote>
+<p>客户端</p>
+</blockquote>
+<pre class="hljs"><code><div>ch.pipeline().addLast(<span class="hljs-keyword">new</span> LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, <span class="hljs-number">7</span>, <span class="hljs-number">4</span>));
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> PacketDecoder());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> LoginResponseHandler());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> MessageResponseHandler());
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> PacketEncoder());
+</div></code></pre>
+<p>这样，在后续 <code>PacketDecoder</code> 进行 decode 操作的时候，ByteBuf 就是一个完整的自定义协议数据包。</p>
+<p>LengthFieldBasedFrameDecoder 有很多重载的构造参数，由于篇幅原因，这里不再展开， 但是没关系，关于 LengthFieldBasedFrameDecoder 的详细使用可参考<a href="https://www.jianshu.com/p/a0a51fd79f62">我的简书</a>，对原理感兴趣的同学可以参考<a href="https://coding.imooc.com/class/230.html">我的视频</a>，了解了详细的使用方法之后，就可以有针对性地根据你的自定义协议来构造 LengthFieldBasedFrameDecoder。</p>
+<h2 id="%E6%8B%92%E7%BB%9D%E9%9D%9E%E6%9C%AC%E5%8D%8F%E8%AE%AE%E8%BF%9E%E6%8E%A5">拒绝非本协议连接</h2>
+<p>不知道大家还记不记得，我们在设计协议的时候为什么在数据包的开头加上一个魔数，遗忘的同学可以参考<a href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db045f265da0f83647c35">客户端与服务端通信协议编解码</a>回顾一下。我们设计魔数的原因是为了尽早屏蔽非本协议的客户端，通常在第一个 handler 处理这段逻辑。我们接下来的做法是每个客户端发过来的数据包都做一次快速判断，判断当前发来的数据包是否是满足我的自定义协议，
+我们只需要继承自 LengthFieldBasedFrameDecoder 的 <code>decode()</code> 方法，然后在 decode 之前判断前四个字节是否是等于我们定义的魔数 <code>0x12345678</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Spliter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">LengthFieldBasedFrameDecoder</span> </span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> LENGTH_FIELD_OFFSET = <span class="hljs-number">7</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> LENGTH_FIELD_LENGTH = <span class="hljs-number">4</span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Spliter</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">super</span>(Integer.MAX_VALUE, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH);
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> Object <span class="hljs-title">decode</span><span class="hljs-params">(ChannelHandlerContext ctx, ByteBuf in)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        <span class="hljs-comment">// 屏蔽非本协议的客户端</span>
+        <span class="hljs-keyword">if</span> (in.getInt(in.readerIndex()) != PacketCodeC.MAGIC_NUMBER) {
+            ctx.channel().close();
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span>.decode(ctx, in);
+    }
+}
+</div></code></pre>
+<p>为什么可以在 <code>decode()</code> 方法写这段逻辑？是因为这里的 <code>decode()</code> 方法中，第二个参数 <code>in</code>，每次传递进来的时候，均为一个数据包的开头，想了解原理的同学可以参考 <a href="https://www.jianshu.com/p/dc26e944da95">netty 源码分析之拆包器的奥秘</a>。</p>
+<p>最后，我们只需要替换一下如下代码即可</p>
+<pre class="hljs"><code><div><span class="hljs-comment">//ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 7, 4));</span>
+<span class="hljs-comment">// 替换为</span>
+ch.pipeline().addLast(<span class="hljs-keyword">new</span> Spliter());
+</div></code></pre>
+<p>然后，我们再来实验一下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/8/28/1657df1b2de64fd5?w=1240&amp;h=1294&amp;f=png&amp;s=467460" alt="image.png"></p>
+<p>可以看到，我们使用 telnet 连接上服务端之后（与服务端建立了连接），向服务端发送一段字符串，由于这段字符串是不符合我们的自定义协议的，于是在第一时间，我们的服务端就关闭了这条连接。</p>
+<h2 id="%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%92%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84-pipeline-%E7%BB%93%E6%9E%84">服务端和客户端的 pipeline 结构</h2>
+<p>至此，我们服务端和客户端的 pipeline 结构为</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/8/28/1657e014321e00b0?w=1240&amp;h=305&amp;f=png&amp;s=76936" alt="image.png"></p>
+<p>最后，我们对本小节内容做一下总结</p>
+<h2 id="%E6%80%BB%E7%BB%93">总结</h2>
+<ol>
+<li>我们通过一个例子来理解为什么要有拆包器，说白了，拆包器的作用就是根据我们的自定义协议，把数据拼装成一个个符合我们自定义数据包大小的 ByteBuf，然后送到我们的自定义协议解码器去解码。</li>
+<li>Netty 自带的拆包器包括基于固定长度的拆包器，基于换行符和自定义分隔符的拆包器，还有另外一种最重要的基于长度域的拆包器。通常 Netty 自带的拆包器已完全满足我们的需求，无需重复造轮子。</li>
+<li>基于 Netty 自带的拆包器，我们可以在拆包之前判断当前连上来的客户端是否是支持自定义协议的客户端，如果不支持，可尽早关闭，节省资源。</li>
+</ol>
+<blockquote>
+<p>本小节完整代码在 <a href="https://github.com/lightningMan/flash-netty/tree/%E6%8B%86%E5%8C%85%E7%B2%98%E5%8C%85%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">github</a> 对应本小节的分支。</p>
+</blockquote>
+<h2 id="%E6%80%9D%E8%80%83">思考</h2>
+<p>在我们的 IM 这个 完整的 pipeline 中，如果我们不添加拆包器，客户端连续向服务端发送数据，会有什么现象发生？为什么会发生这种现象？
+欢迎留言讨论。</p>
+
+</body>
+</html>
